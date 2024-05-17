@@ -167,3 +167,17 @@ __pycache__
 
 # === Rules for C++ development ===
 compile_commands.json
+
+# === TypeScript ===
+*.tsbuildinfo
+
+# === Enviroment ===
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# === Output ===
+dist/
+build/
