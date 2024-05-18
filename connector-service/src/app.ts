@@ -6,7 +6,7 @@ import TelegramBot from "node-telegram-bot-api";
 
 dotenv.config();
 
-const expensesService = new HttpBotExpensesService();
+const expensesService = new HttpBotExpensesService(process.env.BOT_SERVICE_URL!);
 const addExpenses = new AddExpenses(expensesService);
 const telegramBot = new TelegramBot(process.env.TELEGRAM_TOKEN!, {polling: true});
 const expensesTelegramBotListener = new ExpensesTelegramBotListener(telegramBot, addExpenses);
