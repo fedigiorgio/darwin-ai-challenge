@@ -3,9 +3,6 @@ import {AddExpenses} from "../core/use_cases/AddExpenses"
 import {TelegramId} from "../core/domain/TelegramId";
 import {Message} from "../core/domain/Message";
 
-function newTelegramBot(telegram_token: string): TelegramBot {
-    return new TelegramBot(telegram_token, {polling: true});
-}
 
 export class ExpensesTelegramBotListener {
     constructor(private readonly telegramBot: TelegramBot, private readonly addExpenses: AddExpenses) {
