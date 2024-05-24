@@ -10,6 +10,11 @@ class SqlUsersRepository(UsersRepository):
     def __init__(self, session):
         self._session = session
 
+    def add(self, user: User):
+        user_model = self._domain_to_model_user(user)
+        self._session.add(user_model)
+        self._session.commit()
+
     def get(self, telegram_id: str) -> User:
         try:
             user_model = self._session.query(UserModel).options(joinedload(UserModel.expenses)).filter(

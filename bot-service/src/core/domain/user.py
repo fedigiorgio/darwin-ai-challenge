@@ -18,6 +18,10 @@ class User:
     def add_expenses(self, expense: Expenses):
         self.expenses.append(expense)
 
+    @classmethod
+    def new(cls, telegram_id):
+        return cls(None, telegram_id, [])
+
 
 class UsersRepository:
     @abstractmethod
@@ -26,4 +30,8 @@ class UsersRepository:
 
     @abstractmethod
     def save(self, user: User):
+        pass
+
+    @abstractmethod
+    def add(self, user: User):
         pass
