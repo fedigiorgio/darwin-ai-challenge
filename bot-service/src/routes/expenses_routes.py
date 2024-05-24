@@ -9,12 +9,14 @@ from src.core.domain.user import UserNotExistsException
 from src.modules import add_expenses, get_expenses, add_user
 
 
-@app.route('api/telegram-users/<telegram_id>', methods=['POST'])
+@app.route('/api/telegram-users/<telegram_id>', methods=['POST'])
 def add_users_route(telegram_id):
     try:
         add_user.execute(telegram_id)
-    except Exception as ex:
+        return '', HTTPStatus.OK
+    except Exception as e:
         return handle_unexpected_exception(e)
+
 
 @app.route('/api/telegram-users/<telegram_id>/expenses', methods=['POST'])
 def add_expenses_route(telegram_id):
