@@ -3,7 +3,7 @@ from http import HTTPStatus
 from flask import request, jsonify
 
 from src import app
-from src.core.domain.expenses import Expenses
+from src.core.domain.expenses import Expenses, Category
 from src.modules import add_expenses
 
 
@@ -22,6 +22,6 @@ def to_response(expenses: Expenses):
     response_body = {
         'description': expenses.description,
         'amount': expenses.amount,
-        'category': expenses.category
+        'category': expenses.category.value[0]
     }
     return jsonify(response_body), HTTPStatus.OK
