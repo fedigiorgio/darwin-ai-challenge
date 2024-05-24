@@ -6,7 +6,7 @@ from flask import request, jsonify
 from src import app
 from src.core.domain.expenses import Expenses, NotExpensesException
 from src.core.domain.user import UserNotExistsException
-from src.modules import add_expenses
+from src.modules import add_expenses, get_expenses
 
 
 @app.route('/api/telegram-users/<telegram_id>/expenses', methods=['POST'])
@@ -25,6 +25,21 @@ def add_expenses_route(telegram_id):
         return handle_unexpected_exception(e)
 
 
+@app.route('/api/telegram-users/<telegram_id>/expenses', methods=['GET'])
+def get_expenses_route(telegram_id):
+    try:
+        expenses = get_expenses.execute(telegram_id)
+        return to_expenses_response(expenses)
+    except UserNotExistsException as e:
+        return handle_not_exists(e)
+    except Exception as e:
+        return handle_unexpected_exception(e)
+
+
+def to_expenses_response(expenses: list[Expenses]):
+    return jsonify({'expenses': list(map(lambda expense: response_expense(expense), expenses))}), HTTPStatus.OK
+
+
 def handle_not_exists(e: UserNotExistsException):
     logging.warning(e)
     return jsonify({'error:': 'User is not authorized'}), HTTPStatus.UNAUTHORIZED
@@ -41,9 +56,13 @@ def handle_not_expenses(message, telegram_id):
 
 
 def to_response(expenses: Expenses):
-    response_body = {
+    return jsonify(jsonify(expenses)), HTTPStatus.OK
+
+
+def response_expense(expenses: Expenses):
+    return {
         'description': expenses.description,
         'amount': expenses.amount,
-        'category': expenses.category.value
+        'category': expenses.category.value,
+        'added_at': expenses.added_at
     }
-    return jsonify(response_body), HTTPStatus.OK
