@@ -41,7 +41,8 @@ class OpenAIExpensesService(ExpensesService):
              'content': '{"expenses": {"description": "Pizza", "amount": 20.0, "category": "FOOD"}, "result": "OK"}'},
             {'role': 'user', 'content': 'AC/DC Concert the last weekend, it cost 55.5 usd'},
             {'role': 'assistant',
-             'content': '{"expenses": {"description": "AC/DC Concert", "amount": 55.5, "category": "ENTERTAINMENT"},"result": "OK"}'},
+             'content': '{"expenses": {"description": "AC/DC Concert", "amount": 55.5, "category": "ENTERTAINMENT"},'
+                        '"result": "OK"}'},
             {'role': 'user', 'content': 'Hello, how are you?'},
             {'role': 'assistant', 'content': '{"result": "ERROR"}'},
             {'role': 'user', 'content': 'electricity bill, 5 bucks'},

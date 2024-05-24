@@ -14,8 +14,12 @@ export class ExpensesTelegramBotListener {
             const message = new Message(msg.text!!)
 
             this.addExpenses.execute(telegramId, message)
-                .then(e => this.telegramBot.sendMessage(msg.chat.id, `${e.category} expenses added ✅`))
+                .then(e => this.telegramBot.sendMessage(msg.chat.id, `${this.format(e.category)} expenses added ✅`))
                 .catch(_ => _)
         });
+    }
+
+    private format(category: string): string {
+        return category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
     }
 }
