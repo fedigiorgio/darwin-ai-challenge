@@ -8,10 +8,10 @@ from src.core.domain.expenses import Expenses
 class User:
     user_id: int
     telegram_id: str
-    _new_expenses: list[Expenses]
+    expenses: list[Expenses]
 
     def add_expenses(self, expense: Expenses):
-        self._new_expenses.append(expense)
+        self.expenses.append(expense)
 
 
 class UsersRepository:

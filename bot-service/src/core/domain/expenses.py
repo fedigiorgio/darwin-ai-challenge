@@ -40,14 +40,15 @@ class Category(Enum):
 
 @dataclass
 class Expenses:
+    expenses_id: int
     description: str
-    amount: Decimal
+    amount: float
     category: Category
     added_at: datetime
 
     @classmethod
-    def new(cls, description: str, amount: Decimal, category: Category):
-        return cls(description, amount, category, datetime.now())
+    def new(cls, description: str, amount: float, category: Category):
+        return cls(None, description, amount, category, datetime.now())
 
 
 class ExpensesService:

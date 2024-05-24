@@ -1,6 +1,5 @@
 import json
 import logging
-from decimal import Decimal
 
 from openai import OpenAI
 
@@ -75,7 +74,7 @@ class OpenAIExpensesService(ExpensesService):
         try:
             expenses_json_content = json_content['expenses']
             description = expenses_json_content['description']
-            amount = Decimal(expenses_json_content['amount'])
+            amount = expenses_json_content['amount']
             category = Category.of(expenses_json_content['category'])
             return Expenses.new(description, amount, category)
         except Exception as ex:
