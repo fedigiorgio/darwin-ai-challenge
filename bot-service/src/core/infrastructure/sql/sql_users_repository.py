@@ -10,7 +10,7 @@ class SqlUsersRepository(UsersRepository):
         self._session = session
 
     def get(self, telegram_id: str) -> User:
-        user_model = self._session.query(UserModel).options(joinedload(UserModel.items)).filter(
+        user_model = self._session.query(UserModel).options(joinedload(UserModel.expenses)).filter(
             UserModel.telegram_id == telegram_id).one()
         return self._model_to_domain_user(user_model)
 
@@ -19,31 +19,33 @@ class SqlUsersRepository(UsersRepository):
         self._session.merge(user_model)
         self._session.commit()
 
-    @staticmethod
-    def _domain_to_model_user(user: User) -> UserModel:
+    def _domain_to_model_user(self, user: User) -> UserModel:
         return UserModel(
             id=user.user_id,
             telegram_id=user.telegram_id,
-            items=[ExpensesModel(
+            expenses=[ExpensesModel(
                 id=expense.expenses_id,
                 user_id=user.user_id,
                 description=expense.description,
-                amount=float(expense.amount),
+                amount=expense.amount,
                 category=expense.category.value,
                 added_at=expense.added_at
             ) for expense in user.expenses]
         )
 
-    @staticmethod
-    def _model_to_domain_user(user_model: UserModel) -> User:
+    def _model_to_domain_user(self, user_model: UserModel) -> User:
         return User(
             user_id=user_model.id,
             telegram_id=user_model.telegram_id,
             expenses=[Expenses(
                 expenses_id=expense.id,
                 description=expense.description,
-                amount=expense.amount,
+                amount=self._to_float(expense.amount),
                 category=Category.of(expense.category),
-                added_at=expense.created_at
-            ) for expense in user_model.items]
+                added_at=expense.added_at
+            ) for expense in user_model.expenses]
         )
+
+    @staticmethod
+    def _to_float(value):
+        return float(''.join(c for c in value if c.isdigit() or c == '.'))
