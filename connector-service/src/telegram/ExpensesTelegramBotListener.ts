@@ -15,6 +15,7 @@ export class ExpensesTelegramBotListener {
 
             this.addExpenses.execute(telegramId, message)
                 .then(e => this.telegramBot.sendMessage(msg.chat.id, `${e.category} expenses added ✅`))
+                .catch(_ => _)
         });
     }
 }

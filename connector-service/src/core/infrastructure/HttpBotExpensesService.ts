@@ -9,7 +9,7 @@ interface ExpensesResponse {
 }
 
 interface AddExpensesRequest {
-    telegramId: string;
+    telegram_id: string;
     message: string;
 }
 
@@ -17,7 +17,7 @@ export class HttpBotExpensesService implements IExpensesService {
     private readonly url: string
 
     constructor(baseUrl: string) {
-        this.url = `${baseUrl}/expenses`
+        this.url = `${baseUrl}/api/expenses`
     }
 
     async add(telegramId: TelegramId, message: Message): Promise<Expenses> {
@@ -28,7 +28,7 @@ export class HttpBotExpensesService implements IExpensesService {
 
     private createRequest(telegramId: TelegramId, message: Message): AddExpensesRequest {
         return {
-            telegramId: telegramId.value,
+            telegram_id: telegramId.value,
             message: message.value
         };
     }
@@ -39,9 +39,19 @@ export class HttpBotExpensesService implements IExpensesService {
 
 
     private toDomain(response: AxiosResponse<ExpensesResponse>): Expenses {
-        const body = response.data
-        return {
-            category: body.category
-        };
+        if (response.status == 200) {
+            const body = response.data
+            return {
+                category: body.category
+            };
+        }
+        else if (response.status === 400) {
+            throw new Error('Message is not an expense');
+        } else if (response.status === 500) {
+            throw new Error('Bot service fail');
+        } else {
+            throw new Error(`Unexpected error from bot-service: ${response.status}`);
+        }
+
     }
 }

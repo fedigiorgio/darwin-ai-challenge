@@ -4,7 +4,8 @@ from decimal import Decimal
 
 from openai import OpenAI
 
-from src.core.domain.expenses import ExpensesService, Expenses, Category, NotExpensesException, InvalidExpensesValues
+from src.core.domain.expenses import ExpensesService, Expenses, Category, NotExpensesException, \
+    InvalidExpensesValuesException
 
 
 class OpenAIExpensesService(ExpensesService):
@@ -31,8 +32,9 @@ class OpenAIExpensesService(ExpensesService):
             'role': 'system',
             'content': 'You will receive a description of an expense. Your task is to parse the '
                        'description and return a JSON object with the extracted information. If the expense is valid, '
-                       'include the description, amount, and category, and set "result" to "OK". If the expense is '
-                       'not valid, set "result" to "ERROR". Here are the predefined categories: FOOD, UTILITIES, '
+                       'include the description, amount, and category, and set "result" to "OK". If the message does '
+                       'not seem to be an expense,'
+                       'set "result" to "ERROR". Here are the predefined categories: FOOD, UTILITIES, '
                        'INSURANCE, MEDICAL/HEALTHCARE, SAVINGS, EDUCATION, ENTERTAINMENT, and OTHER.'},
             {'role': 'user', 'content': 'Pizza 20 bucks'},
             {'role': 'assistant',
@@ -45,6 +47,24 @@ class OpenAIExpensesService(ExpensesService):
             {'role': 'user', 'content': 'electricity bill, 5 bucks'},
             {'role': 'assistant',
              'content': '{"expenses": {"description": "Electricity Bill", "amount": 5.0, "category": "UTILITIES"}, "result": "OK"}'},
+            {'role': 'user', 'content': 'Steak five dollars'},
+            {'role': 'assistant',
+             'content': '{"expenses": {"description": "Steak", "amount": 5.0, "category": "FOOD"}, "result": "OK"}'},
+            {'role': 'user', 'content': 'toothbrushes $2'},
+            {'role': 'assistant',
+             'content': '{"expenses": {"description": "Toothbrushes", "amount": 2.0, "category": "MEDICAL/HEALTHCARE"}, "result": "OK"}'},
+            {'role': 'user', 'content': 'Soap 0.5 usd'},
+            {'role': 'assistant',
+             'content': '{"expenses": {"description": "Soap", "amount": 0.5, "category": "MEDICAL/HEALTHCARE"}, "result": "OK"}'},
+            {'role': 'user', 'content': 'five dollars in videogames'},
+            {'role': 'assistant',
+             'content': '{"expenses": {"description": "VideoGames", "amount": 5.0, "category": "ENTERTAINMENT"}, "result": "OK"}'},
+            {'role': 'user', 'content': 'beers 2.5'},
+            {'role': 'assistant',
+             'content': '{"expenses": {"description": "Beer", "amount": 2.5, "category": "FOOD"}, "result": "OK"}'},
+            {'role': 'user', 'content': 'Keyboard 6 bucks'},
+            {'role': 'assistant',
+             'content': '{"expenses": {"description": "Keyboard", "amount": 6.0, "category": "OTHER"}, "result": "OK"}'},
             {'role': 'user', 'content': message}
         ]
 
@@ -58,7 +78,7 @@ class OpenAIExpensesService(ExpensesService):
             category = Category.of(expenses_json_content['category'])
             return Expenses.new(description, amount, category)
         except Exception as ex:
-            raise InvalidExpensesValues(ex, json_content)
+            raise InvalidExpensesValuesException(ex, json_content)
 
     @staticmethod
     def _check_is_ok(json_content):

@@ -5,11 +5,12 @@ from decimal import Decimal
 from enum import Enum
 
 
-class InvalidExpensesValues(Exception):
+class InvalidExpensesValuesException(Exception):
     def __int__(self, inner: Exception, content):
         self.inner = inner
         self.content = content
-        super().__init__(f'Could not create expenses with values: {content}, inner exception {inner}')
+        self.message = f'Could not create expenses with values: {content}, inner exception {inner}'
+        super().__init__(self.message)
 
 
 class NotExpensesException(Exception):
@@ -18,23 +19,23 @@ class NotExpensesException(Exception):
 
 
 class Category(Enum):
-    FOOD = 'FOOD',
-    UTILITIES = 'UTILITIES',
-    INSURANCE = 'INSURANCE',
-    MEDICAL_HEALTHCARE = 'MEDICAL/HEALTHCARE',
-    SAVINGS = 'SAVINGS',
-    EDUCATION = 'EDUCATION',
-    ENTERTAINMENT = 'ENTERTAINMENT',
+    FOOD = 'FOOD'
+    UTILITIES = 'UTILITIES'
+    INSURANCE = 'INSURANCE'
+    MEDICAL_HEALTHCARE = 'MEDICAL/HEALTHCARE'
+    SAVINGS = 'SAVINGS'
+    EDUCATION = 'EDUCATION'
+    ENTERTAINMENT = 'ENTERTAINMENT'
     OTHER = 'OTHER'
 
     @classmethod
     def of(cls, value):
         value = value.upper()
         for category in Category:
-            if category.value[0] == value:
+            if category.value == value:
                 return category
 
-        raise Exception(f'f{value} is not a valid category')
+        raise Exception(f'{value} is not a valid category')
 
 
 @dataclass
