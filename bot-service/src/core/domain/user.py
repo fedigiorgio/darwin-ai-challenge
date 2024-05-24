@@ -4,6 +4,11 @@ from dataclasses import dataclass
 from src.core.domain.expenses import Expenses
 
 
+class UserNotExistsException(Exception):
+    def __init__(self, telegram_id: str):
+        super().__init__(f'User with telegram_id {telegram_id} doest not exists')
+
+
 @dataclass
 class User:
     user_id: int

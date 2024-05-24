@@ -1,7 +1,8 @@
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import joinedload
 
 from src.core.domain.expenses import Expenses, Category
-from src.core.domain.user import UsersRepository, User
+from src.core.domain.user import UsersRepository, User, UserNotExistsException
 from src.core.infrastructure.sql.models import UserModel, ExpensesModel
 
 
@@ -10,16 +11,20 @@ class SqlUsersRepository(UsersRepository):
         self._session = session
 
     def get(self, telegram_id: str) -> User:
-        user_model = self._session.query(UserModel).options(joinedload(UserModel.expenses)).filter(
-            UserModel.telegram_id == telegram_id).one()
-        return self._model_to_domain_user(user_model)
+        try:
+            user_model = self._session.query(UserModel).options(joinedload(UserModel.expenses)).filter(
+                UserModel.telegram_id == telegram_id).one()
+            return self._model_to_domain_user(user_model)
+        except NoResultFound:
+            raise UserNotExistsException(telegram_id)
 
     def save(self, user: User):
         user_model = self._domain_to_model_user(user)
         self._session.merge(user_model)
         self._session.commit()
 
-    def _domain_to_model_user(self, user: User) -> UserModel:
+    @staticmethod
+    def _domain_to_model_user(user: User) -> UserModel:
         return UserModel(
             id=user.user_id,
             telegram_id=user.telegram_id,
