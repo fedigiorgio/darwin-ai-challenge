@@ -1,15 +1,16 @@
 import logging
 from http import HTTPStatus
 
-from flask import request, jsonify
+from flask import request, jsonify, Blueprint
 
-from src import app
 from src.core.domain.expenses import Expenses, NotExpensesException
 from src.core.domain.user import UserNotExistsException
 from src.modules import add_expenses, get_expenses, add_user
 
+bp = Blueprint('main', __name__)
 
-@app.route('/api/telegram-users/<telegram_id>', methods=['POST'])
+
+@bp.route('/api/telegram-users/<telegram_id>', methods=['POST'])
 def add_users_route(telegram_id):
     try:
         add_user.execute(telegram_id)
@@ -18,7 +19,7 @@ def add_users_route(telegram_id):
         return handle_unexpected_exception(e)
 
 
-@app.route('/api/telegram-users/<telegram_id>/expenses', methods=['POST'])
+@bp.route('/api/telegram-users/<telegram_id>/expenses', methods=['POST'])
 def add_expenses_route(telegram_id):
     message = request.get_json()['message']
 
@@ -34,7 +35,7 @@ def add_expenses_route(telegram_id):
         return handle_unexpected_exception(e)
 
 
-@app.route('/api/telegram-users/<telegram_id>/expenses', methods=['GET'])
+@bp.route('/api/telegram-users/<telegram_id>/expenses', methods=['GET'])
 def get_expenses_route(telegram_id):
     try:
         expenses = get_expenses.execute(telegram_id)
