@@ -9,6 +9,11 @@ class UserNotExistsException(Exception):
         super().__init__(f'User with telegram_id {telegram_id} doest not exists')
 
 
+class UserAlreadyExistsException(Exception):
+    def __init__(self, telegram_id: str):
+        super().__init__(f'User with telegram_id {telegram_id} already exists')
+
+
 @dataclass
 class User:
     user_id: int
@@ -24,6 +29,10 @@ class User:
 
 
 class UsersRepository:
+    @abstractmethod
+    def exists(self, telegram_id: str) -> bool:
+        pass
+
     @abstractmethod
     def get(self, telegram_id: str) -> User:
         pass

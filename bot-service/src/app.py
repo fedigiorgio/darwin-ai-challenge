@@ -1,5 +1,3 @@
-import logging
-
 from flask import Flask
 
 from src.routes.expenses_routes import bp

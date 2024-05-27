@@ -10,6 +10,10 @@ class SqlUsersRepository(UsersRepository):
     def __init__(self, session):
         self._session = session
 
+    def exists(self, telegram_id: str):
+        query = self._session.query(UserModel).filter(UserModel.telegram_id == telegram_id)
+        return self._session.query(query.exists()).scalar()
+
     def add(self, user: User):
         user_model = self._domain_to_model_user(user)
         self._session.add(user_model)

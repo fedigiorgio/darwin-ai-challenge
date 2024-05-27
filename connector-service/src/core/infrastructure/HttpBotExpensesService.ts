@@ -1,4 +1,4 @@
-import {IExpensesService} from "../domain/expenses/IExpensesService";
+import {IExpensesService, NotAnExpensesError, UnauthorizedUserError} from "../domain/expenses/IExpensesService";
 import {TelegramId} from "../domain/TelegramId";
 import {Message} from "../domain/Message";
 import {Expenses} from "../domain/expenses/Expenses";
@@ -28,27 +28,15 @@ export class HttpBotExpensesService implements IExpensesService {
 
     async get(telegramId: TelegramId): Promise<Expenses[]> {
         const url = this.expensesUrl(telegramId);
-        const body: AxiosResponse<GetExpensesResponse> = await axios.get(url);
-        return this.mapGetResponse(body)
+        const response: AxiosResponse<GetExpensesResponse> = await axios.get(url);
+        return this.mapResponse(response, items => items.expenses.map(e => this.toExpenses(e)))
     }
 
     async add(telegramId: TelegramId, message: Message): Promise<Expenses> {
         const url = this.expensesUrl(telegramId);
         const body = this.createRequest(message);
         const response: AxiosResponse<ExpensesResponse> = await axios.post(url, body);
-        return this.mapAddResponse(response);
-    }
-
-    private mapGetResponse(response: AxiosResponse<GetExpensesResponse>): Expenses[]
-    {
-        if (response.status == 200) {
-            const body = response.data
-            return body.expenses.map(e => this.toExpenses(e));
-        } else if (response.status === 500) {
-            throw new Error('Bot service fail');
-        } else {
-            throw new Error(`Unexpected error from bot-service: ${response.status}`);
-        }
+        return this.mapResponse(response, this.toExpenses)
     }
 
     private createRequest(message: Message): AddExpensesRequest {
@@ -62,21 +50,21 @@ export class HttpBotExpensesService implements IExpensesService {
     }
 
 
-    private mapAddResponse(response: AxiosResponse<ExpensesResponse>): Expenses {
-        if (response.status == 200) {
-            const body = response.data
-            return this.toExpenses(body);
+    private mapResponse<T>(response: AxiosResponse<T>, toDomain: (body: T) => any): any {
+        if (response.status === 200) {
+            const body = response.data;
+            return toDomain(body);
         } else if (response.status === 400) {
-            throw new Error('Message is not an expense');
-        } else if (response.status === 500) {
-            throw new Error('Bot service fail');
+            throw new NotAnExpensesError;
+        } else if (response.status === 401) {
+            throw new UnauthorizedUserError();
         } else {
             throw new Error(`Unexpected error from bot-service: ${response.status}`);
         }
-
     }
 
-    private  toExpenses(body: ExpensesResponse) {
+
+    private toExpenses(body: ExpensesResponse) {
         return {
             amount: body.amount,
             addedAt: body.added_at,

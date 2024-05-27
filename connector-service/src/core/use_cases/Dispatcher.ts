@@ -9,10 +9,15 @@ export class Dispatcher {
     }
 
     async execute(telegramId: TelegramId, message: Message): Promise<ResponseChat> {
-        if (message.value == '/list-expenses')
+        console.log(`Received message: ${message.value} from telegramId: ${telegramId.value}`);
+
+        if (message.isListExpenses())
             return await this.getExpenses.execute(telegramId);
+        else if (message.isTelegramId())
+            return {
+                message: telegramId.value
+            }
         else
             return this.addExpenses.execute(telegramId, message);
     }
-
 }

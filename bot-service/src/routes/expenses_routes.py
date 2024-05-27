@@ -4,17 +4,24 @@ from http import HTTPStatus
 from flask import request, jsonify, Blueprint
 
 from src.core.domain.expenses import Expenses, NotExpensesException
-from src.core.domain.user import UserNotExistsException
+from src.core.domain.user import UserNotExistsException, UserAlreadyExistsException
 from src.modules import add_expenses, get_expenses, add_user
 
 bp = Blueprint('main', __name__)
 
 
+@bp.route('/api/dummy-endpoint', methods=['GET'])
+def add_users_route():
+    return '', HTTPStatus.OK
+
+
 @bp.route('/api/telegram-users/<telegram_id>', methods=['POST'])
 def add_users_route(telegram_id):
     try:
-        add_user.execute(telegram_id)
+        add_user().execute(telegram_id)
         return '', HTTPStatus.OK
+    except UserAlreadyExistsException:
+        return handle_already_exists(telegram_id)
     except Exception as e:
         return handle_unexpected_exception(e)
 
@@ -25,7 +32,7 @@ def add_expenses_route(telegram_id):
 
     try:
         logging.info(f'Received message: {message} from telegram_id: {telegram_id}')
-        expenses = add_expenses.execute(telegram_id, message)
+        expenses = add_expenses().execute(telegram_id, message)
         return to_response(expenses)
     except UserNotExistsException as e:
         return handle_not_exists(e)
@@ -38,7 +45,7 @@ def add_expenses_route(telegram_id):
 @bp.route('/api/telegram-users/<telegram_id>/expenses', methods=['GET'])
 def get_expenses_route(telegram_id):
     try:
-        expenses = get_expenses.execute(telegram_id)
+        expenses = get_expenses().execute(telegram_id)
         return to_expenses_response(expenses)
     except UserNotExistsException as e:
         return handle_not_exists(e)
@@ -48,6 +55,10 @@ def get_expenses_route(telegram_id):
 
 def to_expenses_response(expenses: list[Expenses]):
     return jsonify({'expenses': list(map(lambda expense: response_expense(expense), expenses))}), HTTPStatus.OK
+
+
+def handle_already_exists(telegram_id):
+    return jsonify({'error:': f'User with telegram_id: {telegram_id} already exists'}), HTTPStatus.BAD_REQUEST
 
 
 def handle_not_exists(e: UserNotExistsException):

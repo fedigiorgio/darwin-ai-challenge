@@ -20,8 +20,14 @@ db_password = os.getenv('DB_PASSWORD')
 db_name = os.getenv('DB_NAME')
 
 POSTGRESQL_URL = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
-engine = create_engine(POSTGRESQL_URL, echo=True)
-session_maker = sessionmaker(bind=engine)
+
+engine = create_engine(POSTGRESQL_URL,
+                       echo=True,
+                       pool_size=10,
+                       pool_recycle=1800,
+                       pool_pre_ping=True)
+
+session_maker = sessionmaker(autoflush=True, bind=engine)
 
 logging.basicConfig(level='INFO', format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -30,14 +36,16 @@ logging.basicConfig(level='INFO', format='%(asctime)s - %(levelname)s - %(messag
 def session_scope():
     session = session_maker()
     try:
+        logging.info("New session open")
         yield session
-        session.commit()
     except Exception as e:
         session.rollback()
-        logging.error(f"Error occurred in sql session: {e}", e)
+        logging.error(f"Error occurred in SQL session: {e}", exc_info=True)
         raise
     finally:
+        logging.info("Closing session")
         session.close()
+        logging.info("Session closed")
 
 
 def users_repository():
@@ -52,18 +60,9 @@ def add_expenses():
     return AddExpenses(users_repository(), open_ai_expenses)
 
 
-add_expenses = add_expenses()
-
-
 def get_expenses():
     return GetExpenses(users_repository())
 
 
-get_expenses = get_expenses()
-
-
 def add_user():
     return AddUser(users_repository())
-
-
-add_user = add_user()
