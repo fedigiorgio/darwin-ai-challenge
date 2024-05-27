@@ -66,7 +66,7 @@ def handle_not_expenses(message, telegram_id):
 
 
 def to_response(expenses: Expenses):
-    return jsonify(jsonify(expenses)), HTTPStatus.OK
+    return jsonify(response_expense(expenses)), HTTPStatus.OK
 
 
 def response_expense(expenses: Expenses):
