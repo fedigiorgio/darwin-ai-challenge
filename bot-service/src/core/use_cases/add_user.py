@@ -1,4 +1,4 @@
-from src.core.domain.user import UsersRepository, User
+from src.core.domain.user import UsersRepository, User, UserAlreadyExistsException
 
 
 class AddUser:
