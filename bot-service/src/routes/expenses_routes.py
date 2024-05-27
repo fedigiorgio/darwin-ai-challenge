@@ -11,7 +11,7 @@ bp = Blueprint('main', __name__)
 
 
 @bp.route('/api/dummy-endpoint', methods=['GET'])
-def add_users_route():
+def dummy_endpoint_route():
     return '', HTTPStatus.OK
 
 
