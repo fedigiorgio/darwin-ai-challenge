@@ -4,4 +4,6 @@ import {Expenses} from "./Expenses";
 
 export interface IExpensesService {
     add(telegramId: TelegramId, message: Message): Promise<Expenses>;
+
+    get(telegramId: TelegramId): Promise<Expenses[]>;
 }

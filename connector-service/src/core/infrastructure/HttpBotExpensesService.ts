@@ -5,47 +5,68 @@ import {Expenses} from "../domain/expenses/Expenses";
 import axios, {AxiosResponse} from "axios";
 
 interface ExpensesResponse {
-    category: string;
+    description: string
+    amount: number
+    category: string
+    added_at: string
+}
+
+interface GetExpensesResponse {
+    expenses: ExpensesResponse[]
 }
 
 interface AddExpensesRequest {
-    telegram_id: string;
     message: string;
 }
 
 export class HttpBotExpensesService implements IExpensesService {
-    private readonly url: string
+    private readonly baseUrl: string;
 
     constructor(baseUrl: string) {
-        this.url = `${baseUrl}/api/expenses`
+        this.baseUrl = baseUrl;
+    }
+
+    async get(telegramId: TelegramId): Promise<Expenses[]> {
+        const url = this.expensesUrl(telegramId);
+        const body: AxiosResponse<GetExpensesResponse> = await axios.get(url);
+        return this.mapGetResponse(body)
     }
 
     async add(telegramId: TelegramId, message: Message): Promise<Expenses> {
-        const body = this.createRequest(telegramId, message)
-        const response: AxiosResponse<ExpensesResponse> = await this.post(body)
-        return this.toDomain(response)
+        const url = this.expensesUrl(telegramId);
+        const body = this.createRequest(message);
+        const response: AxiosResponse<ExpensesResponse> = await axios.post(url, body);
+        return this.mapAddResponse(response);
     }
 
-    private createRequest(telegramId: TelegramId, message: Message): AddExpensesRequest {
+    private mapGetResponse(response: AxiosResponse<GetExpensesResponse>): Expenses[]
+    {
+        if (response.status == 200) {
+            const body = response.data
+            return body.expenses.map(e => this.toExpenses(e));
+        } else if (response.status === 500) {
+            throw new Error('Bot service fail');
+        } else {
+            throw new Error(`Unexpected error from bot-service: ${response.status}`);
+        }
+    }
+
+    private createRequest(message: Message): AddExpensesRequest {
         return {
-            telegram_id: telegramId.value,
             message: message.value
         };
     }
 
-    private async post(body: AddExpensesRequest) {
-        return await axios.post(this.url, body);
+    private expensesUrl(telegramId: TelegramId): string {
+        return `${this.baseUrl}/api/telegram-users/${telegramId.value}/expenses`;
     }
 
 
-    private toDomain(response: AxiosResponse<ExpensesResponse>): Expenses {
+    private mapAddResponse(response: AxiosResponse<ExpensesResponse>): Expenses {
         if (response.status == 200) {
             const body = response.data
-            return {
-                category: body.category
-            };
-        }
-        else if (response.status === 400) {
+            return this.toExpenses(body);
+        } else if (response.status === 400) {
             throw new Error('Message is not an expense');
         } else if (response.status === 500) {
             throw new Error('Bot service fail');
@@ -53,5 +74,14 @@ export class HttpBotExpensesService implements IExpensesService {
             throw new Error(`Unexpected error from bot-service: ${response.status}`);
         }
 
+    }
+
+    private  toExpenses(body: ExpensesResponse) {
+        return {
+            amount: body.amount,
+            addedAt: body.added_at,
+            description: body.description,
+            category: body.category
+        };
     }
 }

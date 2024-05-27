@@ -1,5 +1,4 @@
 import TelegramBot from 'node-telegram-bot-api';
-import {AddExpenses} from "../core/use_cases/AddExpenses"
 import {TelegramId} from "../core/domain/TelegramId";
 import {Message} from "../core/domain/Message";
 import {Dispatcher} from "../core/use_cases/Dispatcher";

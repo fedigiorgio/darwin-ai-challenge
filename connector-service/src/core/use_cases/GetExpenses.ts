@@ -14,7 +14,7 @@ export class GetExpenses {
 
     toResponseChat(expenses: Expenses[]): ResponseChat {
         const message = expenses.map(expense => {
-            return `📅 Added at: ${expense.added_at}\n💵 Amount: $${expense.amount}\n🧾 Category: ${format(expense.category)}\n✅ Description: ${expense.description}\n`;
+            return `📅 Added at: ${expense.addedAt}\n💵 Amount: $${expense.amount}\n🧾 Category: ${format(expense.category)}\n✅ Description: ${expense.description}\n`;
         }).join('\n');
 
         return {message: message};
