@@ -1,4 +1,6 @@
+import logging
 import os
+from contextlib import contextmanager
 
 from openai import OpenAI
 from sqlalchemy import create_engine
@@ -20,8 +22,48 @@ db_name = os.getenv('DB_NAME')
 POSTGRESQL_URL = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 engine = create_engine(POSTGRESQL_URL, echo=True)
 session_maker = sessionmaker(bind=engine)
-users_repository = SqlUsersRepository(session_maker())
+
+logging.basicConfig(level='INFO', format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+@contextmanager
+def session_scope():
+    session = session_maker()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logging.error(f"Error occurred in sql session: {e}", e)
+        raise
+    finally:
+        session.close()
+
+
+def users_repository():
+    with session_scope() as session:
+        return SqlUsersRepository(session)
+
+
 open_ai_expenses = OpenAIExpensesService(OpenAI(api_key=open_ai_api_key))
-add_expenses = AddExpenses(users_repository, open_ai_expenses)
-get_expenses = GetExpenses(users_repository)
-add_user = AddUser(users_repository)
+
+
+def add_expenses():
+    return AddExpenses(users_repository(), open_ai_expenses)
+
+
+add_expenses = add_expenses()
+
+
+def get_expenses():
+    return GetExpenses(users_repository())
+
+
+get_expenses = get_expenses()
+
+
+def add_user():
+    return AddUser(users_repository())
+
+
+add_user = add_user()
