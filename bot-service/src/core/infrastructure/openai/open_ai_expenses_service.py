@@ -18,7 +18,7 @@ class OpenAIExpensesService(ExpensesService):
 
     def _execute_chat_prompt(self, prompt):
         chat_completion = self._client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=prompt
         )
         content = chat_completion.choices[0].message.content
