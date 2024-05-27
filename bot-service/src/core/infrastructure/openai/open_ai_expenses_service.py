@@ -33,8 +33,9 @@ class OpenAIExpensesService(ExpensesService):
                        'description and return a JSON object with the extracted information. If the expense is valid, '
                        'include the description, amount, and category, and set "result" to "OK". If the message does '
                        'not seem to be an expense,'
-                       'set "result" to "ERROR". Here are the predefined categories: FOOD, UTILITIES, '
-                       'INSURANCE, MEDICAL/HEALTHCARE, SAVINGS, EDUCATION, ENTERTAINMENT, and OTHER.'},
+                       'set "result" to "ERROR". Here are the predefined categories: HOUSING, TRANSPORTATION, FOOD, '
+                       'UTILITIES, '
+                       'INSURANCE, MEDICAL/HEALTHCARE, SAVINGS, DEBT, EDUCATION, ENTERTAINMENT, and OTHER.'},
             {'role': 'user', 'content': 'Pizza 20 bucks'},
             {'role': 'assistant',
              'content': '{"expenses": {"description": "Pizza", "amount": 20.0, "category": "FOOD"}, "result": "OK"}'},
