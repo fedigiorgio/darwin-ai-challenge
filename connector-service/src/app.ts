@@ -5,6 +5,8 @@ import {AddExpenses} from "./core/use_cases/AddExpenses";
 import TelegramBot from "node-telegram-bot-api";
 import {GetExpenses} from "./core/use_cases/GetExpenses";
 import {Dispatcher} from "./core/use_cases/Dispatcher";
+import {listenDummyServer} from "./DummyServer";
+
 
 dotenv.config();
 
@@ -14,7 +16,7 @@ const addExpenses = new AddExpenses(expensesService);
 const dispatcher = new Dispatcher(getExpenses, addExpenses);
 const telegramBot = new TelegramBot(process.env.TELEGRAM_TOKEN!, {polling: true});
 const expensesTelegramBotListener = new ExpensesTelegramBotListener(telegramBot, dispatcher);
-
+expensesTelegramBotListener.listen()
+listenDummyServer()
 console.log("Connector-Service running");
-expensesTelegramBotListener.listen();
 

@@ -10,12 +10,17 @@ export class ExpensesTelegramBotListener {
 
     listen() {
         this.telegramBot.on('message', (msg) => {
-            const telegramId = new TelegramId(msg.chat.id.toString());
-            const message = new Message(msg.text!!);
+            try {
+                const telegramId = new TelegramId(msg.chat.id.toString());
+                const message = new Message(msg.text!!);
 
-            this.dispatcher.execute(telegramId, message)
-                .then(r => this.telegramBot.sendMessage(msg.chat.id, r.message))
-                .catch(e => console.error(e));
+                this.dispatcher.execute(telegramId, message)
+                    .then(r => this.telegramBot.sendMessage(msg.chat.id, r.message))
+                    .catch(e => console.error(e));
+            }
+            catch(err) {
+                console.error(err);
+            }
         });
     }
 }
