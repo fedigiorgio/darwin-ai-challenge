@@ -15,5 +15,6 @@ const dispatcher = new Dispatcher(getExpenses, addExpenses);
 const telegramBot = new TelegramBot(process.env.TELEGRAM_TOKEN!, {polling: true});
 const expensesTelegramBotListener = new ExpensesTelegramBotListener(telegramBot, dispatcher);
 
+console.log("Connector-Service running");
 expensesTelegramBotListener.listen();
 

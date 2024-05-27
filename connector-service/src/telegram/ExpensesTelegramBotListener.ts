@@ -15,7 +15,7 @@ export class ExpensesTelegramBotListener {
 
             this.dispatcher.execute(telegramId, message)
                 .then(r => this.telegramBot.sendMessage(msg.chat.id, r.message))
-                .catch(_ => _);
+                .catch(e => console.error(e));
         });
     }
 }
